@@ -8,8 +8,12 @@ import os
 # Initialize the Flask app
 app = Flask(__name__)
 
-# Load the model (make sure to provide the correct path to your model)
-model_path = 'models/filter_classification_model.h5'  # Adjust the path as needed
+# Set a limit for the uploaded file size (e.g., 16 MB)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
+
+# Dynamic model loading (ensure your model is uploaded to cloud storage)
+model_url = 'https://your-cloud-storage-url/filter_classification_model.h5'  # Replace with actual model URL
+model_path = tf.keras.utils.get_file('filter_classification_model.h5', model_url)
 model = load_model(model_path)
 
 # Dictionary of filter labels
@@ -32,7 +36,7 @@ filters = {
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get the image file from the request
+        # Check if file is in the request
         if 'file' not in request.files:
             return jsonify({'error': 'No file part in the request'}), 400
         
